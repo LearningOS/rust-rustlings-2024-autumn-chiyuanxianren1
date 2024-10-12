@@ -3,7 +3,7 @@
 // Execute `rustlings hint threads3` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
+
 
 use std::sync::mpsc;
 use std::sync::Arc;
@@ -30,6 +30,9 @@ fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
     let qc = Arc::new(q);
     let qc1 = Arc::clone(&qc);
     let qc2 = Arc::clone(&qc);
+    //对于理解所有权有很大的帮助！！！！！
+    //两个线程同时需要tx的所有权，会发生冲突，所以需要复制一份所有权。
+    let tx1 = mpsc::Sender::clone(&tx);
 
     thread::spawn(move || {
         for val in &qc1.first_half {
@@ -42,7 +45,7 @@ fn send_tx(q: Queue, tx: mpsc::Sender<u32>) -> () {
     thread::spawn(move || {
         for val in &qc2.second_half {
             println!("sending {:?}", val);
-            tx.send(*val).unwrap();
+            tx1.send(*val).unwrap();
             thread::sleep(Duration::from_secs(1));
         }
     });

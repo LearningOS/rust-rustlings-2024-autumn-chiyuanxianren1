@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -47,6 +47,7 @@ impl<T> LinkedList<T> {
     pub fn add(&mut self, obj: T) {
         let mut node = Box::new(Node::new(obj));
         node.next = None;
+        //创建新结点,NonNull里面封装了Node的裸指针。
         let node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(node)) });
         match self.end {
             None => self.start = node_ptr,
@@ -69,13 +70,60 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(list_a:LinkedList<i32>,list_b:LinkedList<i32>) -> LinkedList<i32>
 	{
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        if list_a.length==0{
+            return list_b;
+        }
+        if list_b.length==0{
+            return list_a;
+        }
+        let mut length=0;
+        let mut start=None;
+        let mut end =None;
+        let mut ha=list_a.start;
+        let mut hb=list_b.start;
+        while ha!=None&&hb!=None{
+            length+=1;
+            if unsafe{(*ha.unwrap().as_ptr()).val<(*hb.unwrap().as_ptr()).val}{
+                if start==None{
+                    start=ha;
+                    end=ha;
+                }
+                else{
+                    unsafe{(*end.unwrap().as_ptr()).next=ha;}
+                    end=ha;
+                }
+                ha=unsafe{(*ha.unwrap().as_ptr()).next};
+            }
+            else{
+                if start==None{
+                    start=hb;
+                    end=hb;
+                }
+                else{
+                    unsafe{(*end.unwrap().as_ptr()).next=hb;}
+                    end=hb;
+                }
+                hb=unsafe{(*hb.unwrap().as_ptr()).next};
+            }
+        }
+        if ha==None{
+            unsafe{(*end.unwrap().as_ptr()).next=hb;}
+        }
+        if hb==None{
+            unsafe{(*end.unwrap().as_ptr()).next=ha;}
+        }
+        while let Some(n)= unsafe{(*end.unwrap().as_ptr()).next}{
+            length+=1;
+            end=Some(n);
+        }
+
+		LinkedList::<i32> {
+            length: length,
+            start: start,
+            end: end,
         }
 	}
 }
